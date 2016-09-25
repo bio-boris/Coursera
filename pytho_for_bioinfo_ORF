@@ -1,0 +1,48 @@
+#!/usr/bin/env python
+from collections import *
+import sys
+fasta = open('dna2.fasta')
+
+seqs = defaultdict()
+for line in fasta:
+    line = line.rstrip()
+    if line[0] == '>':
+        name  = line
+        seqs[name] = ''
+    else:
+        seqs[name] = seqs[name] +  line
+
+def orfs(seq,offset):
+    orf = defaultdict(list)
+    inOrf = False
+    orfStart = -1
+    for i in xrange(offset,len(seq),3):
+        codon = seq[i:i+3]
+        if(codon =='ATG' and not inOrf):
+            inOrf =True
+            orfStart = i
+        if((codon =='TAG' or codon == 'TGA' or codon == 'TAA') and inOrf):
+            inOrf =False
+            orf[orfStart].append(codon)
+        if(inOrf):
+            orf[orfStart].append(codon)
+
+    for i in orf:
+        codon = orf[i][-1]
+        if(codon =='TAG' or codon == 'TGA' or codon == 'TAA'):
+            print i+1,len(''.join(orf[i]))
+
+sixmers = defaultdict(int)
+for header in seqs:
+    #print header
+    #offset = 2
+    #orfs(seqs[header],offset)
+    seq = seqs[header]
+    length = 12
+    for i in xrange(0,len(seq)):
+        sixmer = seq[i:i+length]
+        if len(sixmer) == length:
+            sixmers[sixmer]+=1
+
+    for sixmer in sixmers:
+        print sixmer,sixmers[sixmer]
